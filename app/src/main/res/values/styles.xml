@@ -1,0 +1,37 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/grayDark</item>
+        <item name="colorPrimaryDark">@color/grayDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/backgroundDark</item>
+        <item name="android:textColor">@color/colorWhiteish</item>
+    </style>
+
+    <style name="OrangeButton" parent="AppTheme">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:backgroundTint">@color/orange</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="RedButton" parent="AppTheme">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:backgroundTint">@color/red</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AddButton" parent="AppTheme">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:backgroundTint">@color/transparent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MyEditText" parent="AppTheme">
+        <item name="colorControlNormal">@color/colorWhite</item>
+        <item name="colorControlActivated">@color/orange</item>
+        <item name="android:background">@drawable/backwithborder</item>
+    </style>
+
+</resources>

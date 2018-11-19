@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GeoAlarm</string>
+    <string name="txtLocation">Ubicación</string>
+    <string name="edtLocation">e.j. Calzada de Los Reyes</string>
+    <string name="txtTitle">Título</string>
+    <string name="txtDescription">Descripción</string>
+    <string name="btnCancel">Cancelar</string>
+    <string name="btnSave">Guardar</string>
+    <string name="Alarmas">Alarmas</string>
+    <string name="Nothing" />
+    <string name="title_activity_maps">Map</string>
+</resources>
