@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,16 +23,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     ListView lv;
-    Button add;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         lv = findViewById(R.id.alarmsList);
-        add = findViewById(R.id.btnAdd);
-
-        add.setOnClickListener(this);
 
         //Para mostrar las alarmas agregadas
         SQLUtilities conexion = new SQLUtilities(MainActivity.this, "Alarm",null, 1);
@@ -109,10 +107,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.btnAdd){
-            Intent i = new Intent(MainActivity.this, AddAlarm.class);
-            startActivity(i);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.btnAddAlarm:
+                Intent i = new Intent(MainActivity.this, AddAlarm.class);
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }
