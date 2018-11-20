@@ -54,7 +54,7 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
         btnCancelar = findViewById(R.id.btnCancelar);
         edtTitulo = findViewById(R.id.edtTitulo);
         edtDescripcion = findViewById(R.id.edtDescripcion);
-        edtUbicacion = findViewById(R.id.edtUbicacion);
+        //edtUbicacion = findViewById(R.id.edtUbicacion);
 
         btnGuardar.setOnClickListener(this);
         btnCancelar.setOnClickListener(this);
