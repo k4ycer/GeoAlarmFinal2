@@ -108,6 +108,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     alarms
             );
             lv.setAdapter(adaptador);
+
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Bundle b = new Bundle();
+                    Element ayuda = (Element) lv.getItemAtPosition(position);
+                    b.putString("Name", ayuda.getName());
+                    //Toast.makeText(MainActivity.this, ayuda.getName(), Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(MainActivity.this, EditAlarm.class);
+                    i.putExtra("bundle", b);
+                    startActivity(i);
+                }
+            });
         }
     }
 
