@@ -39,6 +39,7 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
     private int latitud, longitud;
     private LatLng currentLatLng;
     PlaceAutocompleteFragment autocompleteFragment;
+    int id;
 
     private List<Address> address;
 
@@ -74,12 +75,13 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
 
         List<Element> list = new ArrayList<>();
         String[] args = new String[]{titulo};
-        Cursor c = db.rawQuery("SELECT descrition, latitude, longitude FROM Alarm WHERE name = ?", args);
+        Cursor c = db.rawQuery("SELECT descrition, latitude, longitude, idAlarm FROM Alarm WHERE name = ?", args);
         if (c.moveToFirst()) {
             edtTitulo.setText(titulo);
             descripcion = c.getString(0);
             latitud = c.getInt(1);
             longitud = c.getInt(2);
+            id = c.getInt(3);
         }
 
         db.close();
@@ -163,13 +165,13 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btnGuardar){
-            createAlarm();
+            updateAlarm();
         }else if (v.getId() == R.id.btnCancelar){
             finish();
         }
     }
 
-    private void createAlarm(){
+    private void updateAlarm(){
         if(currentLatLng == null){
             Toast.makeText(EditAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
             return;
@@ -188,11 +190,11 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
             nuevoRegistro.put("latitude", currentLatLng.latitude);
             nuevoRegistro.put("longitude", currentLatLng.longitude);
             nuevoRegistro.put("status", true);
-            db.insert("Alarm", null, nuevoRegistro);
+            db.update("Alarm", nuevoRegistro, "idAlarm = "+ Integer.toString(id),null);
             db.close();
 
             // Alarm created successfully
-            Toast.makeText(EditAlarm.this, "Alarma creada correctamente", Toast.LENGTH_SHORT).show();
+            Toast.makeText(EditAlarm.this, "Alarma actualizada correctamente", Toast.LENGTH_SHORT).show();
             finish();
         } catch (Exception e) {
             Toast.makeText(EditAlarm.this, "Lo sentimos, surgió un error", Toast.LENGTH_SHORT).show();
