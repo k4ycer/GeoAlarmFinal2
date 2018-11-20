@@ -9,4 +9,5 @@
     <string name="Alarmas">Alarmas</string>
     <string name="Nothing" />
     <string name="title_activity_maps">Map</string>
+    <string name="txtAddAlarm">Add Alarm</string>
 </resources>
