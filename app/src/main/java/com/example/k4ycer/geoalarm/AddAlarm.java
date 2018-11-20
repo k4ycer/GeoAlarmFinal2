@@ -143,8 +143,10 @@ public class AddAlarm extends AppCompatActivity implements OnMapReadyCallback, V
     }
 
     private void createAlarm(){
-        if(currentLatLng == null){
-            Toast.makeText(AddAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
+        titulo = edtTitulo.getText().toString();
+        descripcion = edtDescripcion.getText().toString();
+
+        if(!formaValida(titulo, descripcion, currentLatLng)){
             return;
         }
 
@@ -152,8 +154,6 @@ public class AddAlarm extends AppCompatActivity implements OnMapReadyCallback, V
             //guardar
             SQLUtilities conexion = new SQLUtilities(AddAlarm.this, "Alarm",null, 1);
             SQLiteDatabase db = conexion.getWritableDatabase();
-            titulo = edtTitulo.getText().toString();
-            descripcion = edtDescripcion.getText().toString();
 
             ContentValues nuevoRegistro = new ContentValues();
             nuevoRegistro.put("name",titulo);
@@ -170,6 +170,25 @@ public class AddAlarm extends AppCompatActivity implements OnMapReadyCallback, V
         } catch (Exception e) {
             Toast.makeText(AddAlarm.this, "Lo sentimos, surgió un error", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean formaValida(String titulo, String descripcion, LatLng currentLatLng){
+        if(titulo == null || titulo.isEmpty()){
+            Toast.makeText(AddAlarm.this, "Por favor ingresa el titulo", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(descripcion == null || descripcion.isEmpty()){
+            Toast.makeText(AddAlarm.this, "Por favor ingresa la descripcion", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(currentLatLng == null){
+            Toast.makeText(AddAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 
     private void placeOptionSelected(Place place){

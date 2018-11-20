@@ -2,7 +2,6 @@ package com.example.k4ycer.geoalarm.services;
 
 import android.Manifest;
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,13 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -26,7 +22,7 @@ import android.util.Log;
 import com.example.k4ycer.geoalarm.App;
 import com.example.k4ycer.geoalarm.MainActivity;
 import com.example.k4ycer.geoalarm.R;
-import com.example.k4ycer.geoalarm.model.Element;
+import com.example.k4ycer.geoalarm.model.Alarm;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
@@ -38,7 +34,7 @@ public class AlarmLocationService extends Service{
             new LocationListener(LocationManager.GPS_PROVIDER)
     };
     String [] myPermissions;
-    List<Element> alarms;
+    List<Alarm> alarms;
     NotificationManagerCompat nm;
 
     private class LocationListener implements android.location.LocationListener{
@@ -164,15 +160,15 @@ public class AlarmLocationService extends Service{
         }
     }
 
-    public void loadAlarms(List<Element> alarms){
+    public void loadAlarms(List<Alarm> alarms){
         this.alarms = alarms;
     }
 
-    public void searchForMatches(LatLng currentLocation, List<Element> alarms, double radius){
+    public void searchForMatches(LatLng currentLocation, List<Alarm> alarms, double radius){
         if(alarms == null){
             return;
         }
-        for (Element alarm: alarms) {
+        for (Alarm alarm: alarms) {
             double distance = distance(currentLocation.latitude, alarm.getLatLng().latitude, currentLocation.longitude, alarm.getLatLng().longitude, 0, 0);
             if(distance <= radius){
                 sendNotification(alarm);
@@ -200,7 +196,7 @@ public class AlarmLocationService extends Service{
         return Math.sqrt(distance);
     }
 
-    public void sendNotification(Element alarm){
+    public void sendNotification(Alarm alarm){
         NotificationManager nm = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
         Intent i = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
