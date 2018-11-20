@@ -169,6 +169,9 @@ public class AlarmLocationService extends Service{
             return;
         }
         for (Alarm alarm: alarms) {
+            if(alarm.getStatus() == false){
+                continue;
+            }
             double distance = distance(currentLocation.latitude, alarm.getLatLng().latitude, currentLocation.longitude, alarm.getLatLng().longitude, 0, 0);
             if(distance <= radius){
                 sendNotification(alarm);
