@@ -1,13 +1,20 @@
 package com.example.k4ycer.geoalarm;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.LocationManager;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ListView lv;
     Button btnIniciar;
     AlarmLocationService alarmLocationService;
+    String myPermissions[] = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +80,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivity(i);
                 }
             });
+        }
+
+        // Solicitar permisos para Localizacion
+        boolean granted = true;
+        for (String permission : myPermissions)
+            granted &= ActivityCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_GRANTED;
+        if (!granted){
+            ActivityCompat.requestPermissions(MainActivity.this, myPermissions, 1);
         }
 
         // Iniciar servicio de localizacion
@@ -165,5 +181,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onServiceDisconnected(ComponentName name) {
         alarmLocationService = null;
         Toast.makeText(MainActivity.this, "Desconectado del servicio", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull final String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 1:{
+                boolean granted = true;
+                for (String permission : permissions)
+                    granted &= ActivityCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_GRANTED;
+                if (grantResults.length > 0 && granted){
+
+                } else {
+                    showDialog("Necesitas otorgar permisos para utilizar la aplicación",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
+                                }
+                            });
+                }
+                break;
+            }
+        }
+    }
+
+    private void showDialog(String message, DialogInterface.OnClickListener myListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", myListener)
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }
