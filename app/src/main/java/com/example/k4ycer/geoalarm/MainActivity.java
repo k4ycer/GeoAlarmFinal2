@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.example.k4ycer.geoalarm.data.SQLUtilities;
 import com.example.k4ycer.geoalarm.model.Element;
 import com.example.k4ycer.geoalarm.services.AlarmLocationService;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button btnIniciar;
     AlarmLocationService alarmLocationService;
     String myPermissions[] = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+    List<Element> alarms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,26 +49,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         lv = findViewById(R.id.alarmsList);
 
-        //Para mostrar las alarmas agregadas
-        SQLUtilities conexion = new SQLUtilities(MainActivity.this, "Alarm",null, 1);
-        SQLiteDatabase db = conexion.getWritableDatabase();
-
-        List<Element> list = new ArrayList<>();
-        Cursor c = db.rawQuery("SELECT name, descrition, status FROM Alarm", null);
-        if (c.moveToFirst()) {
-            do {
-                list.add(new Element(c.getString(0),c.getString(1),c.getInt(2) > 0));
-            } while(c.moveToNext());
-        }
-
-        db.close();
+        this.alarms = getAlarms();
 
 
-        if(list != null) {
+        if(alarms != null) {
             ArrayAdapter<Element> adaptador = new CustomAdapterAlarm(
                     MainActivity.this,
                     R.layout.custom_layout_alarm,
-                    list
+                    alarms
             );
             lv.setAdapter(adaptador);
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -108,36 +98,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SQLiteDatabase db = conexion.getWritableDatabase();
 
         // Get alarms from Database
-        List<Element> list = new ArrayList<>();
-        Cursor c = db.rawQuery("SELECT name, descrition, status FROM Alarm", null);
-        if (c.moveToFirst()) {
-            do {
-                list.add(new Element(c.getString(0),c.getString(1),c.getInt(2) > 0));
-            } while(c.moveToNext());
-        }
-        db.close();
+        alarms = getAlarms();
 
         // Show alarms in listview
-        if(list != null) {
+        if(alarms != null) {
             ArrayAdapter<Element> adaptador = new CustomAdapterAlarm(
                     MainActivity.this,
                     R.layout.custom_layout_alarm,
-                    list
+                    alarms
             );
             lv.setAdapter(adaptador);
-
-            /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this, "hola", Toast.LENGTH_SHORT).show();
-                    Bundle b = new Bundle();
-                    Element ayuda = (Element) lv.getItemAtPosition(position);
-                    b.putString("Name", ayuda.getName());
-                    Intent i = new Intent(MainActivity.this, EditAlarm.class);
-                    i.putExtra("bundle", b);
-                    startActivity(i);
-                }
-            });*/
         }
     }
 
@@ -174,13 +144,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onServiceConnected(ComponentName name, IBinder service) {
         AlarmLocationService.CustomBinder b = (AlarmLocationService.CustomBinder) service;
         alarmLocationService = b.getService();
-        Toast.makeText(MainActivity.this, "Conectado al servicio", Toast.LENGTH_SHORT).show();
+        alarmLocationService.loadAlarms(alarms);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
         alarmLocationService = null;
-        Toast.makeText(MainActivity.this, "Desconectado del servicio", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -212,5 +181,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setPositiveButton("OK", myListener)
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private List<Element> getAlarms(){
+        SQLUtilities conexion = new SQLUtilities(MainActivity.this, "Alarm",null, 1);
+        SQLiteDatabase db = conexion.getWritableDatabase();
+
+        List<Element> alarms = new ArrayList<>();
+        Cursor c = db.rawQuery("SELECT name, descrition, latitude, longitude, status FROM Alarm", null);
+        if (c.moveToFirst()) {
+            do {
+                alarms.add(new Element(
+                        c.getString(c.getColumnIndex("name")),
+                        c.getString(c.getColumnIndex("descrition")),
+                        new LatLng(
+                                c.getDouble(c.getColumnIndex("latitude")),
+                                c.getDouble(c.getColumnIndex("longitude"))
+                        ),
+                        c.getInt(c.getColumnIndex("status")) > 0));
+            } while(c.moveToNext());
+        }
+
+        db.close();
+
+        return alarms;
     }
 }
