@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.LocationManager;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -17,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,10 +23,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.k4ycer.geoalarm.data.SQLUtilities;
-import com.example.k4ycer.geoalarm.model.Element;
+import com.example.k4ycer.geoalarm.model.Alarm;
 import com.example.k4ycer.geoalarm.services.AlarmLocationService;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -40,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button btnIniciar;
     AlarmLocationService alarmLocationService;
     String myPermissions[] = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-    List<Element> alarms;
+    List<Alarm> alarms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         if(alarms != null) {
-            ArrayAdapter<Element> adaptador = new CustomAdapterAlarm(
+            ArrayAdapter<Alarm> adaptador = new CustomAdapterAlarm(
                     MainActivity.this,
                     R.layout.custom_layout_alarm,
                     alarms
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Bundle b = new Bundle();
-                    Element ayuda = (Element) lv.getItemAtPosition(position);
+                    Alarm ayuda = (Alarm) lv.getItemAtPosition(position);
                     b.putString("Name", ayuda.getName());
                     Intent i = new Intent(MainActivity.this, EditAlarm.class);
                     i.putExtra("bundle", b);
@@ -102,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Show alarms in listview
         if(alarms != null) {
-            ArrayAdapter<Element> adaptador = new CustomAdapterAlarm(
+            ArrayAdapter<Alarm> adaptador = new CustomAdapterAlarm(
                     MainActivity.this,
                     R.layout.custom_layout_alarm,
                     alarms
@@ -113,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Bundle b = new Bundle();
-                    Element ayuda = (Element) lv.getItemAtPosition(position);
+                    Alarm ayuda = (Alarm) lv.getItemAtPosition(position);
                     b.putString("Name", ayuda.getName());
                     //Toast.makeText(MainActivity.this, ayuda.getName(), Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(MainActivity.this, EditAlarm.class);
@@ -196,15 +193,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .show();
     }
 
-    private List<Element> getAlarms(){
+    private List<Alarm> getAlarms(){
         SQLUtilities conexion = new SQLUtilities(MainActivity.this, "Alarm",null, 1);
         SQLiteDatabase db = conexion.getWritableDatabase();
 
-        List<Element> alarms = new ArrayList<>();
+        List<Alarm> alarms = new ArrayList<>();
         Cursor c = db.rawQuery("SELECT name, descrition, latitude, longitude, status FROM Alarm", null);
         if (c.moveToFirst()) {
             do {
-                alarms.add(new Element(
+                alarms.add(new Alarm(
                         c.getString(c.getColumnIndex("name")),
                         c.getString(c.getColumnIndex("descrition")),
                         new LatLng(

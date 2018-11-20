@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,7 +13,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.k4ycer.geoalarm.data.SQLUtilities;
-import com.example.k4ycer.geoalarm.model.Element;
+import com.example.k4ycer.geoalarm.model.Alarm;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
@@ -26,7 +25,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +71,7 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
         SQLUtilities conexion = new SQLUtilities(EditAlarm.this, "Alarm",null, 1);
         SQLiteDatabase db = conexion.getWritableDatabase();
 
-        List<Element> list = new ArrayList<>();
+        List<Alarm> list = new ArrayList<>();
         String[] args = new String[]{titulo};
         Cursor c = db.rawQuery("SELECT descrition, latitude, longitude, idAlarm FROM Alarm WHERE name = ?", args);
         if (c.moveToFirst()) {
@@ -172,8 +170,10 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
     }
 
     private void updateAlarm(){
-        if(currentLatLng == null){
-            Toast.makeText(EditAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
+        titulo = edtTitulo.getText().toString();
+        descripcion = edtDescripcion.getText().toString();
+
+        if(!formaValida(titulo, descripcion, currentLatLng)){
             return;
         }
 
@@ -181,8 +181,6 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
             //guardar
             SQLUtilities conexion = new SQLUtilities(EditAlarm.this, "Alarm",null, 1);
             SQLiteDatabase db = conexion.getWritableDatabase();
-            titulo = edtTitulo.getText().toString();
-            descripcion = edtDescripcion.getText().toString();
 
             ContentValues nuevoRegistro = new ContentValues();
             nuevoRegistro.put("name",titulo);
@@ -215,5 +213,24 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
 
     private void addMarker(GoogleMap gmap, LatLng latLng, String title){
         gmap.addMarker(new MarkerOptions().position(latLng).title(title));
+    }
+
+    private boolean formaValida(String titulo, String descripcion, LatLng currentLatLng){
+        if(titulo == null || titulo.isEmpty()){
+            Toast.makeText(EditAlarm.this, "Por favor ingresa el titulo", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(descripcion == null || descripcion.isEmpty()){
+            Toast.makeText(EditAlarm.this, "Por favor ingresa la descripcion", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(currentLatLng == null){
+            Toast.makeText(EditAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 }

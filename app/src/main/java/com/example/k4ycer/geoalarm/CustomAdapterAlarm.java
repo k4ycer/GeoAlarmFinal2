@@ -8,16 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.Switch;
 import android.widget.TextView;
 
-import com.example.k4ycer.geoalarm.model.Element;
+import com.example.k4ycer.geoalarm.model.Alarm;
 
 import java.util.List;
 
-public class CustomAdapterAlarm extends ArrayAdapter<Element> {
+public class CustomAdapterAlarm extends ArrayAdapter<Alarm> {
     Context context;
-    public CustomAdapterAlarm(@NonNull Context context, int resource, @NonNull List<Element> objects) {
+    public CustomAdapterAlarm(@NonNull Context context, int resource, @NonNull List<Alarm> objects) {
         super(context, resource, objects);
         this.context = context;
     }
@@ -34,7 +33,7 @@ public class CustomAdapterAlarm extends ArrayAdapter<Element> {
         TextView description = vista.findViewById(R.id.txtDescription);
         CheckBox status = vista.findViewById(R.id.checkBoxAlarm);
 
-        Element elemento = getItem(position);
+        Alarm elemento = getItem(position);
 
         name.setText(elemento.getName());
         description.setText(elemento.getDescription());
