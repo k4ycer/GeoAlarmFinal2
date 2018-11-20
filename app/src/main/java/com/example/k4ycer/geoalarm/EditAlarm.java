@@ -7,6 +7,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,11 +15,16 @@ import android.widget.Toast;
 
 import com.example.k4ycer.geoalarm.data.SQLUtilities;
 import com.example.k4ycer.geoalarm.model.Element;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,9 +34,11 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
     private MapView mapView;
     private GoogleMap gmap;
     private Button btnGuardar, btnCancelar;
-    private EditText edtUbicacion, edtTitulo, edtDescripcion;
+    private EditText edtTitulo, edtDescripcion;
     private String ubicacion, titulo, descripcion;
     private int latitud, longitud;
+    private LatLng currentLatLng;
+    PlaceAutocompleteFragment autocompleteFragment;
 
     private List<Address> address;
 
@@ -54,7 +62,6 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
         btnCancelar = findViewById(R.id.btnCancelar);
         edtTitulo = findViewById(R.id.edtTitulo);
         edtDescripcion = findViewById(R.id.edtDescripcion);
-        //edtUbicacion = findViewById(R.id.edtUbicacion);
 
         btnGuardar.setOnClickListener(this);
         btnCancelar.setOnClickListener(this);
@@ -73,14 +80,25 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
             descripcion = c.getString(0);
             latitud = c.getInt(1);
             longitud = c.getInt(2);
-            edtDescripcion.setText(descripcion);
         }
 
         db.close();
 
-        gmap.setMinZoomPreference(18);
-        LatLng ny = new LatLng(latitud, longitud);
-        gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
+        edtDescripcion.setText(descripcion);
+
+        autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                placeOptionSelected(place);
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.e("k4ycer15", "An error occurred: " + status);
+            }
+        });
     }
 
     @Override
@@ -135,53 +153,65 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
-        gmap.setMinZoomPreference(18);
-        LatLng ny = new LatLng(18.807951, -99.220916);
-        gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
+        LatLng marcador = new LatLng(latitud, longitud);
+        gmap.addMarker(new MarkerOptions().position(marcador));
+        gmap.moveCamera(CameraUpdateFactory.newLatLng(marcador));
+        gmap.setMinZoomPreference(15);
+        //setMapPosition(gmap, 18, marcador);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btnGuardar){
-            ubicacion = edtUbicacion.getText().toString();
-            if(ubicacion.equals("")){
-                Toast.makeText(EditAlarm.this, "No hay dirección para buscar", Toast.LENGTH_SHORT).show();
-            }else{
-                Toast.makeText(EditAlarm.this, "Buscando", Toast.LENGTH_SHORT).show();
-                Geocoder coder = new Geocoder(getApplicationContext());
-
-                try {
-                    address = coder.getFromLocationName(ubicacion, 1);
-                    Address location = address.get(0);
-                    int lat = (int) (location.getLatitude()*1E6);
-                    int lon = (int) (location.getLongitude()*1E6);
-
-                    //guardar
-                    SQLUtilities conexion = new SQLUtilities(EditAlarm.this, "Alarm",null, 1);
-                    SQLiteDatabase db = conexion.getWritableDatabase();
-                    titulo = edtTitulo.getText().toString();
-                    descripcion = edtDescripcion.getText().toString();
-
-                    ContentValues nuevoRegistro = new ContentValues();
-                    nuevoRegistro.put("name",titulo);
-                    nuevoRegistro.put("descrition",descripcion);
-                    nuevoRegistro.put("latitude", lat);
-                    nuevoRegistro.put("longitude", lon);
-                    nuevoRegistro.put("status", true);
-                    db.insert("Alarm", null, nuevoRegistro);
-                    db.close();
-
-                    gmap.setMinZoomPreference(18);
-                    LatLng ny = new LatLng(lat, lon);
-                    gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
-                } catch (IOException e) {
-                    Toast.makeText(EditAlarm.this, "No se encontro la dirección", Toast.LENGTH_SHORT).show();
-                }
-                finish();
-            }
-
+            createAlarm();
         }else if (v.getId() == R.id.btnCancelar){
             finish();
         }
+    }
+
+    private void createAlarm(){
+        if(currentLatLng == null){
+            Toast.makeText(EditAlarm.this, "Por favor ingresa la ubicacion", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            //guardar
+            SQLUtilities conexion = new SQLUtilities(EditAlarm.this, "Alarm",null, 1);
+            SQLiteDatabase db = conexion.getWritableDatabase();
+            titulo = edtTitulo.getText().toString();
+            descripcion = edtDescripcion.getText().toString();
+
+            ContentValues nuevoRegistro = new ContentValues();
+            nuevoRegistro.put("name",titulo);
+            nuevoRegistro.put("descrition",descripcion);
+            nuevoRegistro.put("latitude", currentLatLng.latitude);
+            nuevoRegistro.put("longitude", currentLatLng.longitude);
+            nuevoRegistro.put("status", true);
+            db.insert("Alarm", null, nuevoRegistro);
+            db.close();
+
+            // Alarm created successfully
+            Toast.makeText(EditAlarm.this, "Alarma creada correctamente", Toast.LENGTH_SHORT).show();
+            finish();
+        } catch (Exception e) {
+            Toast.makeText(EditAlarm.this, "Lo sentimos, surgió un error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void placeOptionSelected(Place place){
+        currentLatLng = place.getLatLng();
+        addMarker(gmap, place.getLatLng(), place.getName().toString());
+        setMapPosition(gmap, 18, place.getLatLng());
+    }
+
+    private void setMapPosition(GoogleMap gmap, Integer zoom, LatLng latLng){
+        gmap.setMinZoomPreference(zoom);
+        LatLng ny = latLng;
+        gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
+    }
+
+    private void addMarker(GoogleMap gmap, LatLng latLng, String title){
+        gmap.addMarker(new MarkerOptions().position(latLng).title(title));
     }
 }

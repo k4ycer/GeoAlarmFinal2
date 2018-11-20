@@ -29,41 +29,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         lv = findViewById(R.id.alarmsList);
-
-        //Para mostrar las alarmas agregadas
-        SQLUtilities conexion = new SQLUtilities(MainActivity.this, "Alarm",null, 1);
-        SQLiteDatabase db = conexion.getWritableDatabase();
-
-        List<Element> list = new ArrayList<>();
-        Cursor c = db.rawQuery("SELECT name, descrition, status FROM Alarm", null);
-        if (c.moveToFirst()) {
-            do {
-                list.add(new Element(c.getString(0),c.getString(1),c.getInt(2) > 0));
-            } while(c.moveToNext());
-        }
-
-        db.close();
-
-
-        if(list != null) {
-            ArrayAdapter<Element> adaptador = new CustomAdapterAlarm(
-                    MainActivity.this,
-                    R.layout.custom_layout_alarm,
-                    list
-            );
-            lv.setAdapter(adaptador);
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Bundle b = new Bundle();
-                    Element ayuda = (Element) lv.getItemAtPosition(position);
-                    b.putString("Name", ayuda.getName());
-                    Intent i = new Intent(MainActivity.this, EditAlarm.class);
-                    i.putExtra("bundle", b);
-                    startActivity(i);
-                }
-            });
-        }
     }
 
     @Override
@@ -91,18 +56,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             );
             lv.setAdapter(adaptador);
 
-            /*lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this, "hola", Toast.LENGTH_SHORT).show();
                     Bundle b = new Bundle();
                     Element ayuda = (Element) lv.getItemAtPosition(position);
                     b.putString("Name", ayuda.getName());
+                    //Toast.makeText(MainActivity.this, ayuda.getName(), Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(MainActivity.this, EditAlarm.class);
                     i.putExtra("bundle", b);
                     startActivity(i);
                 }
-            });*/
+            });
         }
     }
 
