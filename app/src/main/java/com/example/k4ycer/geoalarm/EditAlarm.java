@@ -31,7 +31,7 @@ import java.util.List;
 public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
     private MapView mapView;
     private GoogleMap gmap;
-    private Button btnGuardar, btnCancelar;
+    private Button btnGuardar, btnCancelar, btnEliminar;
     private EditText edtTitulo, edtDescripcion;
     private String ubicacion, titulo, descripcion;
     private int latitud, longitud;
@@ -59,11 +59,14 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
 
         btnGuardar = findViewById(R.id.btnGuardar);
         btnCancelar = findViewById(R.id.btnCancelar);
+        btnEliminar = findViewById(R.id.btnEliminar);
+
         edtTitulo = findViewById(R.id.edtTitulo);
         edtDescripcion = findViewById(R.id.edtDescripcion);
 
         btnGuardar.setOnClickListener(this);
         btnCancelar.setOnClickListener(this);
+        btnEliminar.setOnClickListener(this);
 
         Bundle b = getIntent().getBundleExtra("bundle");
         titulo = b.getString("Name");
@@ -165,6 +168,12 @@ public class EditAlarm extends AppCompatActivity implements OnMapReadyCallback, 
         if (v.getId() == R.id.btnGuardar){
             updateAlarm();
         }else if (v.getId() == R.id.btnCancelar){
+            finish();
+        }else if (v.getId() == R.id.btnEliminar){
+            SQLUtilities conexion = new SQLUtilities(EditAlarm.this, "Alarm",null, 1);
+            SQLiteDatabase db = conexion.getWritableDatabase();
+            String[] args = new String[]{"Pedro"};
+            db.delete("Alarm", "idAlarm = "+Integer.toString(id), null);
             finish();
         }
     }
